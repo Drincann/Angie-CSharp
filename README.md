@@ -1,6 +1,6 @@
 # Angie-C\#
 
-C# 实现的 nodejs-webframework-like Web 框架
+C# 实现的 nodejs-webframework-like Web 框架，尚未实现 AngieRequest、AngieResponse。
 
 与 [Angie-java]([/](https://github.com/Drincann/Angie-java)) 的 HashMap 路由不同，Angie-C\# 仅带有一个真实的同步中间件实现。
 
