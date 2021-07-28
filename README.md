@@ -23,3 +23,39 @@ app.use((req, res, next) =>
 
 app.listen(80);
 ```
+
+这是因为，use 的每一次调用将像这样包装一个入口:
+
+接下来，每次请求都将进入这个包装，并从中间件栈顶递归包装到栈底，并生成一个新的中间件入口:
+
+```cs
+this.entry = (req, res) =>
+{
+  Stack<AngieMiddleware> middlewaresCloned = new Stack<AngieMiddleware>(new Stack<AngieMiddleware>(this.middlewares));
+
+  AngieMiddleware eachMiddleware = null;
+  AngieNextMiddleware previousNext = null;
+  while (middlewaresCloned.TryPop(out eachMiddleware))
+  {
+    var currentMiddleware = eachMiddleware;
+    var next = previousNext;
+    previousNext = () =>
+    {
+      currentMiddleware(req, res, next);
+    };
+  }
+  previousNext();
+};
+```
+
+他几乎等同于 Mirai-js 的这一段中间件实现，只不过后者是同步协程:
+
+[Mirai-js/src/Middleware.js#L596](https://github.com/Drincann/Mirai-js/blob/master/src/Middleware.js#L596)
+
+```js
+let entry = (req, res) => {
+  return this.middlewares.reduceRight((next, currentMiddleware) => {
+    return async () => await currentMiddleware(req, res, next);
+  }, undefined)();
+};
+```
